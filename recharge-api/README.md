@@ -13,7 +13,7 @@ Java 17+, Spring Boot 3.3, Spring Data JPA, MySQL 8, Bean Validation, Postman.
    La base `recharge_db` est créée automatiquement (`createDatabaseIfNotExist=true`),
    sinon : `CREATE DATABASE recharge_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
 3. Lancer : `mvn spring-boot:run` (ou exécuter `RechargeApplication` depuis l'IDE).
-4. API disponible sur http://localhost:8081/api
+4. API disponible sur http://localhost:8081/
 5. Tests unitaires (sans base) : `mvn test`
 
 ### Avec Spring Tools
