@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VoltGo – Réservation de bornes de recharge</title>
+<style>
+:root{--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--bg:#f1f5f9;--g1:#10b981;--g2:#0ea5e9}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+aside{width:250px;background:linear-gradient(180deg,#0b1f2a,#0f3d3e);color:#cbd5e1;padding:24px 16px;position:sticky;top:0;height:100vh;flex-shrink:0}
+.logo{display:flex;gap:10px;align-items:center;color:#fff;font-weight:800;font-size:20px;margin:0 6px 30px}
+.logo i{background:linear-gradient(135deg,var(--g1),var(--g2));width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-style:normal;box-shadow:0 6px 16px #10b98166}
+nav button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:inherit;padding:12px 14px;border-radius:12px;cursor:pointer;font:inherit;margin-bottom:5px;transition:.2s}
+nav button:hover{background:#ffffff18}
+nav button.on{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;font-weight:600;box-shadow:0 8px 18px #10b98150}
+.foot{position:absolute;bottom:18px;left:22px;font-size:12px;opacity:.55}
+.wrap{flex:1;padding:28px 34px;min-width:0}
+.hero{background:linear-gradient(120deg,#0f766e,#0ea5e9);color:#fff;border-radius:22px;padding:28px 32px;margin-bottom:22px;position:relative;overflow:hidden;box-shadow:0 14px 30px #0ea5e944}
+.hero h1{margin:0 0 4px;font-size:28px}.hero p{margin:0;opacity:.9}
+.hero:after{content:"⚡";position:absolute;right:34px;top:-14px;font-size:150px;opacity:.16}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:#fff;border-radius:18px;padding:16px 18px;box-shadow:0 2px 8px #0f172a12;display:flex;gap:14px;align-items:center;transition:.25s}
+.kpi:hover{transform:translateY(-3px)}
+.kpi i{font-style:normal;font-size:22px;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,#d1fae5,#e0f2fe)}
+.kpi b{display:block;font-size:24px;line-height:1.1}.kpi span{color:var(--mut);font-size:13px}
+section{display:none}section.on{display:block;animation:in .35s}
+@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.card{background:#fff;border-radius:20px;padding:22px 24px;box-shadow:0 2px 8px #0f172a12;margin-bottom:20px}
+h3{margin:0 0 14px;font-size:17px;display:flex;align-items:center;gap:8px}
+form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end}
+input,select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;transition:.2s;min-width:0}
+input:focus,select:focus{outline:0;border-color:var(--g1);box-shadow:0 0 0 4px #10b98122}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px}
+.a{background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;border:0;padding:10px 20px;border-radius:10px;cursor:pointer;font:inherit;font-weight:600;transition:.2s;box-shadow:0 6px 14px #10b98144}
+.a:hover{transform:translateY(-2px);filter:brightness(1.07)}
+.s{background:#fff;border:1px solid var(--line);padding:5px 11px;border-radius:8px;cursor:pointer;font-size:13px;margin:2px 4px 2px 0;transition:.2s}
+.s:hover{background:#f0fdfa;border-color:var(--g1)}.d{color:#dc2626}.d:hover{background:#fef2f2;border-color:#fca5a5}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);padding:10px;border-bottom:2px solid var(--line)}
+td{padding:12px 10px;border-bottom:1px solid var(--line);font-size:14px}tr:hover td{background:#f8fafc}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.it{border:1px solid var(--line);border-radius:16px;padding:18px;transition:.25s;background:linear-gradient(180deg,#fff,#f8fafc)}
+.it:hover{transform:translateY(-4px);box-shadow:0 14px 28px #0f172a1a}
+.it h4{margin:0;font-size:17px;display:flex;justify-content:space-between;align-items:center;gap:8px}.it small{color:var(--mut)}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;gap:8px}
+.bar{height:7px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--g1),var(--g2));border-radius:9px}
+.tag{background:#e0f2fe;color:#0369a1;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:600;margin:2px 3px 2px 0;display:inline-block}
+.pill{padding:3px 11px;border-radius:99px;font-size:12px;font-weight:700;display:inline-block}
+.p-DISPONIBLE,.p-CONFIRMEE{background:#dcfce7;color:#15803d}.p-EN_MAINTENANCE{background:#fef3c7;color:#b45309}
+.p-HORS_SERVICE,.p-ANNULEE{background:#fee2e2;color:#b91c1c}.p-TERMINEE{background:#e2e8f0;color:#475569}
+.empty{text-align:center;color:var(--mut);padding:26px;font-size:14px}.empty b{font-size:34px;display:block}
+#t{position:fixed;right:24px;bottom:24px;padding:14px 20px;border-radius:14px;color:#fff;max-width:420px;z-index:9;box-shadow:0 12px 30px #0003;transform:translateY(120px);opacity:0;transition:.35s}
+#t.show{transform:none;opacity:1}.ok{background:linear-gradient(135deg,#059669,#10b981)}.er{background:linear-gradient(135deg,#dc2626,#f43f5e)}
+@media(max-width:860px){body{flex-direction:column}aside{width:auto;height:auto;position:static;padding:14px}.logo{margin-bottom:12px}.foot{display:none}
+nav{display:flex;overflow-x:auto;gap:6px}nav button{white-space:nowrap;width:auto;margin:0}.wrap{padding:16px}.hero h1{font-size:22px}}
+</style></head><body>
+<aside><div class="logo"><i>⚡</i>VoltGo</div>
+<nav id="nav"><button data-t="s1" class="on">🏢 Stations &amp; bornes</button><button data-t="s2">👤 Utilisateurs &amp; véhicules</button><button data-t="s3">📅 Réservations</button><button data-t="s4">🔎 Recherches &amp; stats</button></nav>
+<div class="foot">Spring Boot · MySQL</div></aside>
+<div class="wrap">
+<div class="hero"><h1>Rechargez malin, réservez vite</h1><p>Trouvez une borne compatible avec votre véhicule et réservez votre créneau en quelques clics.</p></div>
+<div class="kpis">
+<div class="kpi"><i>🏢</i><div><b id="kS">0</b><span>Stations</span></div></div>
+<div class="kpi"><i>🔌</i><div><b id="kB">0</b><span>Bornes</span></div></div>
+<div class="kpi"><i>👤</i><div><b id="kU">0</b><span>Utilisateurs</span></div></div>
+<div class="kpi"><i>📅</i><div><b id="kR">0</b><span>Réservations</span></div></div>
+<div class="kpi"><i>💰</i><div><b id="kC">0</b><span>Chiffre d’affaires (DT)</span></div></div>
+</div>
+
+<section id="s1" class="on">
+<div class="card"><h3>🏢 Stations</h3>
+<form id="fStation"><input name="nom" placeholder="Nom de la station" required><input name="adresse" placeholder="Adresse" required><input name="ville" placeholder="Ville" required><button class="a">+ Ajouter</button></form>
+<div id="tStations"></div></div>
+<div class="card"><h3>☕ Équipements <small style="color:var(--mut);font-weight:400">(relation N–N avec les stations)</small></h3>
+<form id="fEquip"><input name="libelle" placeholder="Ex : WiFi, Café, Parking couvert" required><button class="a">+ Ajouter</button></form>
+<form id="fAssoc"><label>Station<select name="s" id="assocS" required></select></label><label>Équipement<select name="e" id="assocE" required></select></label><button class="a">Associer</button></form>
+<div id="tEquip"></div></div>
+<div class="card"><h3>🔌 Bornes</h3>
+<form id="fBorne"><label>Station<select name="stationId" id="borneS" required></select></label><input name="code" placeholder="Code (B-001)" required style="width:130px"><input name="puissanceKw" type="number" step="0.1" placeholder="kW" required style="width:90px"><select name="typeConnecteur" class="conn"></select><input name="tarifHoraire" type="number" step="0.1" placeholder="DT / heure" required style="width:110px"><button class="a">+ Ajouter</button></form>
+<div id="tBornes"></div></div>
+</section>
+
+<section id="s2">
+<div class="card"><h3>👤 Utilisateurs</h3>
+<form id="fUser"><input name="nom" placeholder="Nom" required><input name="prenom" placeholder="Prénom" required><input name="email" type="text" placeholder="Email" required><input name="telephone" placeholder="Téléphone (8 chiffres)"><button class="a">+ Ajouter</button></form>
+<div id="tUsers"></div></div>
+<div class="card"><h3>🚗 Véhicules de : <span id="vu" class="tag">choisissez un utilisateur</span></h3>
+<form id="fVeh"><input name="immatriculation" placeholder="Immatriculation" required><input name="marque" placeholder="Marque" required><input name="modele" placeholder="Modèle" required><select name="typeConnecteur" class="conn"></select><button class="a">+ Ajouter</button></form>
+<div id="tVeh"></div></div>
+</section>
+
+<section id="s3">
+<div class="card"><h3>📅 Nouvelle réservation</h3>
+<form id="fResa"><label>Utilisateur<select name="u" id="resaU" required></select></label><label>Véhicule<select name="v" id="resaV" required></select></label><label>Borne<select name="b" id="resaB" required></select></label>
+<label>Début<input type="datetime-local" name="debut" required></label><label>Fin<input type="datetime-local" name="fin" required></label><button class="a">Réserver</button></form></div>
+<div class="card"><h3>📋 Toutes les réservations</h3><div id="tResa"></div></div>
+</section>
+
+<section id="s4">
+<div class="card"><h3>🔎 Bornes libres dans une ville <small style="color:var(--mut);font-weight:400">(requête 1)</small></h3>
+<form id="fDispo"><input name="ville" placeholder="Ville (ex : Tunis)" required><label>Début<input type="datetime-local" name="debut" required></label><label>Fin<input type="datetime-local" name="fin" required></label><button class="a">Rechercher</button></form><div id="rDispo"></div></div>
+<div class="card"><h3>⚙️ Bornes par connecteur et puissance <small style="color:var(--mut);font-weight:400">(requête 2)</small></h3>
+<form id="fRech"><select name="type" class="conn"></select><input name="puissanceMin" type="number" placeholder="kW minimum" style="width:130px"><button class="a">Rechercher</button></form><div id="rRech"></div></div>
+<div class="card"><h3>📊 Statistiques <small style="color:var(--mut);font-weight:400">(requêtes 3 et 4)</small></h3><div id="tStats"></div></div>
+</section>
+</div>
+<div id="t"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CONN=['TYPE1','TYPE2','CCS','CHADEMO'],STAT=['DISPONIBLE','EN_MAINTENANCE','HORS_SERVICE'];
+let U=[],S=[],E=[],B=[],R=[],curU=null;
+function toast(m,ok=true){const t=$('#t');t.textContent=(ok?'✅ ':'⚠️ ')+m;t.className=(ok?'ok':'er')+' show';clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),4000)}
+async function api(m,u,b){const r=await fetch('/api'+u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});let d=null;try{d=await r.json()}catch(e){}
+ if(!r.ok){const x=d&&d.message;throw new Error(x&&typeof x==='object'?Object.values(x).join(' · '):(x||'Erreur '+r.status))}return d}
+async function run(fn,msg){try{await fn();if(msg)toast(msg);await load();return true}catch(e){toast(e.message,false);return false}}
+const dt=v=>v.length===16?v+':00':v, fmt=v=>String(v).replace('T',' ').slice(0,16);
+const opts=(a,f)=>a.map(x=>`<option value="${x.id}">${esc(f(x))}</option>`).join('');
+function fill(id,html){const el=$(id),v=el.value;el.innerHTML=html;if([...el.options].some(o=>o.value===v))el.value=v}
+const empty=(i,t)=>`<div class="empty"><b>${i}</b>${t}</div>`;
+const tbl=(h,r,e)=>r.length?`<div class="tw"><table><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr>${r.map(x=>`<tr>${x.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</table></div>`:empty(...(e||['📭','Aucune donnée']));
+const btn=(t,fn,c='')=>`<button class="s ${c}" onclick="${fn}">${t}</button>`;
+const pill=s=>`<span class="pill p-${s}">${String(s).replace('_',' ')}</span>`;
+const rm=p=>{if(confirm('Confirmer la suppression ?'))run(()=>api('DELETE',p),'Supprimé')};
+
+async function load(){
+ [U,S,E,B,R]=await Promise.all([api('GET','/utilisateurs'),api('GET','/stations'),api('GET','/equipements'),api('GET','/bornes'),api('GET','/reservations')]);
+ render();await Promise.all([stats(),loadVeh(),loadResaVeh()]);
+}
+function render(){
+ document.querySelectorAll('.conn').forEach(s=>{if(!s.options.length)s.innerHTML=CONN.map(c=>`<option>${c}</option>`).join('')});
+ $('#kS').textContent=S.length;$('#kB').textContent=B.length;$('#kU').textContent=U.length;$('#kR').textContent=R.length;
+ $('#tStations').innerHTML=S.length?`<div class="grid">${S.map(s=>`<div class="it"><h4>🏢 ${esc(s.nom)}</h4><small>📍 ${esc(s.adresse)}, ${esc(s.ville)}</small>
+  <div style="margin-top:10px">${(s.equipements||[]).map(e=>`<span class="tag">${esc(e.libelle)}</span>`).join('')||'<small>Aucun équipement</small>'}</div>
+  <div class="row">${btn('💰 CA',`ca(${s.id})`)}${btn('Supprimer',`rm('/stations/${s.id}')`,'d')}</div></div>`).join('')}</div>`:empty('🏢','Aucune station : ajoutez-en une ci-dessus');
+ $('#tEquip').innerHTML=E.map(e=>`<span class="tag">${esc(e.libelle)} <a href="#" onclick="rm('/equipements/${e.id}');return false" style="color:#dc2626;text-decoration:none">✕</a></span>`).join('')||empty('☕','Aucun équipement');
+ $('#tBornes').innerHTML=B.length?`<div class="grid">${B.map(b=>`<div class="it"><h4>🔌 ${esc(b.code)} ${pill(b.statut)}</h4><small>🏢 ${esc(b.station&&b.station.nom)} · ${esc(b.station&&b.station.ville)}</small>
+  <div class="row"><span><b>${b.puissanceKw} kW</b></span><span class="tag">${b.typeConnecteur}</span></div>
+  <div class="bar"><i style="width:${Math.min(100,b.puissanceKw/1.5)}%"></i></div>
+  <div class="row"><span>💶 <b>${b.tarifHoraire}</b> DT/h</span><select onchange="st(${b.id},this.value)">${STAT.map(x=>`<option${x===b.statut?' selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="row">${btn('Supprimer',`rm('/bornes/${b.id}')`,'d')}</div></div>`).join('')}</div>`:empty('🔌','Aucune borne : ajoutez-en une ci-dessus');
+ $('#tUsers').innerHTML=tbl(['ID','Nom','Email','Téléphone','Actions'],U.map(u=>[u.id,'<b>'+esc(u.nom+' '+u.prenom)+'</b>',esc(u.email),esc(u.telephone||'—'),btn('🚗 Véhicules',`pick(${u.id})`)+btn('Supprimer',`rm('/utilisateurs/${u.id}')`,'d')]),['👤','Aucun utilisateur']);
+ $('#tResa').innerHTML=tbl(['ID','Utilisateur','Borne','Véhicule','Début','Fin','Statut','Montant','Actions'],R.map(r=>[r.id,esc(r.utilisateur.nom),'<b>'+esc(r.borne.code)+'</b>',esc(r.vehicule.immatriculation),fmt(r.dateDebut),fmt(r.dateFin),pill(r.statut),'<b>'+r.montant+' DT</b>',
+  btn('Modifier',`mod(${r.id})`)+btn('Annuler',`run(()=>api('PATCH','/reservations/${r.id}/annuler'),'Réservation annulée')`)+btn('✕',`rm('/reservations/${r.id}')`,'d')]),['📅','Aucune réservation']);
+ const su=opts(S,s=>s.nom+' ('+s.ville+')');fill('#assocS',su);fill('#borneS',su);
+ fill('#assocE',opts(E,e=>e.libelle));fill('#resaU',opts(U,u=>u.nom+' '+u.prenom));fill('#resaB',opts(B,b=>b.code+' – '+b.typeConnecteur+' – '+b.puissanceKw+' kW'));
+}
+async function loadVeh(){
+ const u=U.find(x=>x.id===curU);if(!u){curU=null;$('#vu').textContent='choisissez un utilisateur';$('#tVeh').innerHTML=empty('🚗','Cliquez sur « Véhicules » dans la liste des utilisateurs');return}
+ $('#vu').textContent=u.nom+' '+u.prenom;const v=await api('GET',`/utilisateurs/${u.id}/vehicules`);
+ $('#tVeh').innerHTML=tbl(['ID','Immatriculation','Marque','Modèle','Connecteur','Actions'],v.map(x=>[x.id,'<b>'+esc(x.immatriculation)+'</b>',esc(x.marque),esc(x.modele),'<span class="tag">'+x.typeConnecteur+'</span>',btn('Supprimer',`rm('/vehicules/${x.id}')`,'d')]),['🚗','Aucun véhicule pour cet utilisateur']);
+}
+async function loadResaVeh(){
+ const u=$('#resaU').value;if(!u){$('#resaV').innerHTML='';return}
+ const v=await api('GET',`/utilisateurs/${u}/vehicules`);fill('#resaV',opts(v,x=>x.immatriculation+' ('+x.typeConnecteur+')'));
+}
+async function stats(){
+ const st=await api('GET','/reservations/statistiques');
+ const ca=await Promise.all(S.map(s=>api('GET',`/stations/${s.id}/chiffre-affaires`).then(x=>[s.nom,x.chiffreAffaires])));
+ $('#kC').textContent=ca.reduce((a,x)=>a+Number(x[1]),0).toFixed(2);
+ $('#tStats').innerHTML=tbl(['Station','Réservations'],st.map(x=>['<b>'+esc(x.station)+'</b>',x.nbReservations]),['📊','Pas encore de réservation'])+'<h3 style="margin-top:20px">💰 Chiffre d’affaires par station</h3>'+tbl(['Station','CA (DT)'],ca.map(x=>['<b>'+esc(x[0])+'</b>',x[1]]),['💰','Aucune station']);
+}
+const pick=id=>{curU=id;loadVeh().catch(e=>toast(e.message,false))};
+const st=(id,v)=>run(()=>api('PATCH',`/bornes/${id}/statut?statut=${v}`),'Statut modifié');
+async function ca(id){try{const x=await api('GET',`/stations/${id}/chiffre-affaires`);toast('Chiffre d’affaires : '+x.chiffreAffaires+' DT')}catch(e){toast(e.message,false)}}
+function mod(id){const r=R.find(x=>x.id===id);const d=prompt('Nouveau début (AAAA-MM-JJTHH:MM)',r.dateDebut.slice(0,16));if(!d)return;
+ const f=prompt('Nouvelle fin (AAAA-MM-JJTHH:MM)',r.dateFin.slice(0,16));if(!f)return;
+ run(()=>api('PUT',`/reservations/${id}?debut=${dt(d)}&fin=${dt(f)}`),'Réservation modifiée')}
+async function search(url,target){try{const b=await api('GET',url);
+ $(target).innerHTML=tbl(['Code','Station','Ville','kW','Connecteur','Tarif/h'],b.map(x=>['<b>'+esc(x.code)+'</b>',esc(x.station.nom),esc(x.station.ville),x.puissanceKw+' kW','<span class="tag">'+x.typeConnecteur+'</span>',x.tarifHoraire+' DT']),['😕','Aucune borne trouvée']);}catch(e){toast(e.message,false)}return false}
+
+const F={
+ fStation:d=>run(()=>api('POST','/stations',d),'Station créée'),
+ fEquip:d=>run(()=>api('POST','/equipements',d),'Équipement créé'),
+ fAssoc:d=>run(()=>api('POST',`/stations/${d.s}/equipements/${d.e}`),'Équipement associé'),
+ fBorne:d=>{const id=d.stationId;delete d.stationId;d.puissanceKw=+d.puissanceKw;d.tarifHoraire=+d.tarifHoraire;return run(()=>api('POST',`/stations/${id}/bornes`,d),'Borne créée')},
+ fUser:d=>run(()=>api('POST','/utilisateurs',d),'Utilisateur créé'),
+ fVeh:d=>{if(!curU){toast('Choisissez d’abord un utilisateur (bouton Véhicules)',false);return false}return run(()=>api('POST',`/utilisateurs/${curU}/vehicules`,d),'Véhicule ajouté')},
+ fResa:d=>run(()=>api('POST','/reservations',{utilisateurId:+d.u,vehiculeId:+d.v,borneId:+d.b,dateDebut:dt(d.debut),dateFin:dt(d.fin)}),'Réservation confirmée !'),
+ fDispo:d=>search(`/bornes/disponibles?ville=${encodeURIComponent(d.ville)}&debut=${dt(d.debut)}&fin=${dt(d.fin)}`,'#rDispo'),
+ fRech:d=>search(`/bornes/recherche?type=${d.type}&puissanceMin=${d.puissanceMin||0}`,'#rRech')
+};
+document.addEventListener('submit',async e=>{e.preventDefault();const f=e.target;
+ const d=Object.fromEntries([...new FormData(f)].filter(x=>x[1]!==''));
+ if(await F[f.id](d)!==false&&!/Dispo|Rech/.test(f.id))f.reset()});
+$('#resaU').addEventListener('change',()=>loadResaVeh().catch(e=>toast(e.message,false)));
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('#'+b.dataset.t).classList.add('on')});
+load().catch(e=>toast('API injoignable : '+e.message,false));
+</script></body></html>

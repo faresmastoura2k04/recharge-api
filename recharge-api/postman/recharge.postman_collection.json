@@ -1,0 +1,968 @@
+{
+  "info": {
+    "name": "Recharge API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const d = new Date(Date.now() + 7*24*3600*1000);",
+          "const day = d.toISOString().slice(0,10);",
+          "pm.collectionVariables.set('debut', day + 'T10:00:00');",
+          "pm.collectionVariables.set('fin', day + 'T12:00:00');",
+          "pm.collectionVariables.set('debutChev', day + 'T11:00:00');",
+          "pm.collectionVariables.set('finChev', day + 'T13:00:00');",
+          "pm.collectionVariables.set('email', 'sara' + Date.now() + '@mail.com');",
+          "pm.collectionVariables.set('immat', 'TUN' + Date.now());",
+          "pm.collectionVariables.set('codeBorne', 'B-' + Date.now());"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Scénario nominal",
+      "item": [
+        {
+          "name": "1 Créer utilisateur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"save id\", () => { const j = pm.response.json(); pm.collectionVariables.set(\"userId\", j.id); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Ben Ali\",\n  \"prenom\": \"Sara\",\n  \"email\": \"{{email}}\",\n  \"telephone\": \"22123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "2 Créer véhicule",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"save id\", () => { const j = pm.response.json(); pm.collectionVariables.set(\"vehiculeId\", j.id); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs/{{userId}}/vehicules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "{{userId}}",
+                "vehicules"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"immatriculation\": \"{{immat}}\",\n  \"marque\": \"Tesla\",\n  \"modele\": \"Model 3\",\n  \"typeConnecteur\": \"TYPE2\"\n}"
+            }
+          }
+        },
+        {
+          "name": "3 Créer station",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"save id\", () => { const j = pm.response.json(); pm.collectionVariables.set(\"stationId\", j.id); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Station Centre\",\n  \"adresse\": \"Av. Habib Bourguiba\",\n  \"ville\": \"Tunis\"\n}"
+            }
+          }
+        },
+        {
+          "name": "4 Créer équipement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"save id\", () => { const j = pm.response.json(); pm.collectionVariables.set(\"equipId\", j.id); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/equipements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "equipements"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"libelle\": \"WiFi {{immat}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "5 Associer équipement (N-N)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"1 equipement\", () => pm.expect(pm.response.json().equipements.length).to.eql(1));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stations/{{stationId}}/equipements/{{equipId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stations",
+                "{{stationId}}",
+                "equipements",
+                "{{equipId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "6 Créer borne",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"save id\", () => { const j = pm.response.json(); pm.collectionVariables.set(\"borneId\", j.id); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stations/{{stationId}}/bornes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stations",
+                "{{stationId}}",
+                "bornes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"{{codeBorne}}\",\n  \"puissanceKw\": 22,\n  \"typeConnecteur\": \"TYPE2\",\n  \"tarifHoraire\": 4.5\n}"
+            }
+          }
+        },
+        {
+          "name": "7 Bornes disponibles (requête 1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"liste non vide\", () => pm.expect(pm.response.json().length).to.be.above(0));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bornes/disponibles?ville=Tunis&debut={{debut}}&fin={{fin}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bornes",
+                "disponibles"
+              ],
+              "query": [
+                {
+                  "key": "ville",
+                  "value": "Tunis"
+                },
+                {
+                  "key": "debut",
+                  "value": "{{debut}}"
+                },
+                {
+                  "key": "fin",
+                  "value": "{{fin}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "8 Réserver",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"save id\", () => { const j = pm.response.json(); pm.collectionVariables.set(\"reservationId\", j.id); });",
+                  "pm.test(\"montant 9.00\", () => pm.expect(Number(pm.response.json().montant)).to.eql(9));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"utilisateurId\": {{userId}},\n  \"vehiculeId\": {{vehiculeId}},\n  \"borneId\": {{borneId}},\n  \"dateDebut\": \"{{debut}}\",\n  \"dateFin\": \"{{fin}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "9 Recherche connecteur/puissance (requête 2)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bornes/recherche?type=TYPE2&puissanceMin=11",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bornes",
+                "recherche"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "TYPE2"
+                },
+                {
+                  "key": "puissanceMin",
+                  "value": "11"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "10 Statistiques (requête 3)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/statistiques",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations",
+                "statistiques"
+              ]
+            }
+          }
+        },
+        {
+          "name": "11 Chiffre d'affaires (requête 4)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stations/{{stationId}}/chiffre-affaires",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stations",
+                "{{stationId}}",
+                "chiffre-affaires"
+              ]
+            }
+          }
+        },
+        {
+          "name": "12 Historique utilisateur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs/{{userId}}/reservations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "{{userId}}",
+                "reservations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "13 Modifier utilisateur",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "{{userId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Ben Ali\",\n  \"prenom\": \"Sarra\",\n  \"email\": \"{{email}}\",\n  \"telephone\": \"22123456\"\n}"
+            }
+          }
+        },
+        {
+          "name": "14 Changer statut borne",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bornes/{{borneId}}/statut?statut=DISPONIBLE",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bornes",
+                "{{borneId}}",
+                "statut"
+              ],
+              "query": [
+                {
+                  "key": "statut",
+                  "value": "DISPONIBLE"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cas d'erreur",
+      "item": [
+        {
+          "name": "E1 Validation (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"\",\n  \"prenom\": \"X\",\n  \"email\": \"pasunemail\",\n  \"telephone\": \"12\"\n}"
+            }
+          }
+        },
+        {
+          "name": "E2 Utilisateur inexistant (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs",
+                "999999"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E3 Email en double (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Ben Ali\",\n  \"prenom\": \"Sara\",\n  \"email\": \"{{email}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "E4 Chevauchement (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"utilisateurId\": {{userId}},\n  \"vehiculeId\": {{vehiculeId}},\n  \"borneId\": {{borneId}},\n  \"dateDebut\": \"{{debutChev}}\",\n  \"dateFin\": \"{{finChev}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "E5 Fin avant début (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"utilisateurId\": {{userId}},\n  \"vehiculeId\": {{vehiculeId}},\n  \"borneId\": {{borneId}},\n  \"dateDebut\": \"{{fin}}\",\n  \"dateFin\": \"{{debut}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "E6 Utilisateur inexistant dans la réservation (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"utilisateurId\": 999999,\n  \"vehiculeId\": {{vehiculeId}},\n  \"borneId\": {{borneId}},\n  \"dateDebut\": \"{{debutChev}}\",\n  \"dateFin\": \"{{finChev}}\"\n}"
+            }
+          }
+        },
+        {
+          "name": "E7 JSON mal formé (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/utilisateurs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "utilisateurs"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{ nom: "
+            }
+          }
+        },
+        {
+          "name": "E8 Supprimer station avec réservations (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stations/{{stationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "stations",
+                "{{stationId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E9 Annuler réservation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/{{reservationId}}/annuler",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations",
+                "{{reservationId}}",
+                "annuler"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E10 Annuler deux fois (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/{{reservationId}}/annuler",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations",
+                "{{reservationId}}",
+                "annuler"
+              ]
+            }
+          }
+        },
+        {
+          "name": "E11 Modifier réservation annulée (409)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reservations/{{reservationId}}?debut={{debut}}&fin={{fin}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reservations",
+                "{{reservationId}}"
+              ],
+              "query": [
+                {
+                  "key": "debut",
+                  "value": "{{debut}}"
+                },
+                {
+                  "key": "fin",
+                  "value": "{{fin}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
